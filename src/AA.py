@@ -1,28 +1,37 @@
-# -*- coding: utf-8 -*-
 """
-Created on Sat Apr 05 14:57:05 2014
+Adamic-Adar
 
-@author: Administrator
+@author: DY
 """
 
 import math
 import numpy as np
 
-def predict_link(train):
-    dim = train.shape[0]
-    neig = [set() for i in range(dim)]
-    for i in range(dim):
-        for j in range(i + 1, dim):
-            if train[i][j]:
-                neig[i].add(j)
-                neig[j].add(i)
-            
-    sim = np.zeros((dim, dim), dtype = np.float)
-    for i in range(dim):
-        for j in range(i + 1, dim):
-            for z in neig[i] & neig[j]:
-                sim[i][j] += (1.0 / math.log(len(neig[z])))
+def cal_score(G):
+    """
+    Parameters
+    ----------
+    G: list
+        A undirected graph of the network. The nodes are
+        indexed from 0. The ith element of G is a set
+        containing its neighors.
+
+    Returns
+    -------
+    sim: ndarray
+        A n by n matrix where n is the number of all
+        nodes. The element sim[i][j] represents the
+        similarity between the ith node and the jth node.
+    """
+    dim = len(G)
+    sim = np.zeros((dim, dim))
+    for i in xrange(dim):
+        for j in xrange(i + 1, dim):
+            common_neig = G[i] & G[j]
+            for z in common_neig:
+                if len(G[z]) != 1:
+                    sim[i][j] += (1. / math.log(len(G[z])))
             sim[j][i] = sim[i][j]
+
     return sim
-    
-#print math.log(8, 2)
+
