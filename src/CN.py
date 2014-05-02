@@ -26,7 +26,7 @@ def cal_score(G):
     sim = np.zeros((dim, dim))
     for i in xrange(dim):
         for j in xrange(i + 1, dim):
-            common_neig = G[i] & (G[j])
+            common_neig = G[i] & G[j]
             sim[i][j] = sim[j][i] = len(common_neig)
 
     return sim
