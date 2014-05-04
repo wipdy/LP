@@ -1,16 +1,39 @@
-import numpy as np
+"""
+unit test
 
-import CN
+@author: DY
+"""
+
+import numpy as np
+import sys
+
+sys.path.append('./predictor/')
+
+import JC
 
 def predict_link(train):
-    return train.dot(train)
+    dim = train.shape[0]
+    neig = [set() for i in range(dim)]  
+    for i in range(dim):
+        for j in range(dim):
+            if train[i][j]:
+                neig[i].add(j)
+
+                
+    sim = np.zeros((dim, dim), dtype = np.float)
+    for i in range(dim):
+        for j in range(dim):
+            if len(neig[i] | neig[j]) > 0:
+                sim[i][j] = float(len(neig[i] & neig[j])) / (len(neig[i] | neig[j]))
+    return sim
+    
 
 
 def test():
     kase = 20
     for __ in xrange(kase):
         G, train = gen_graph()        
-        sim1 = CN.cal_score(G)
+        sim1 = JC.cal_score(G)
         sim2 = predict_link(train)
         print 'test case: ', __  + 1
         if valid(sim1, sim2):
@@ -27,7 +50,7 @@ def test():
 
 def gen_graph():
     import random
-    dim = random.randint(3, 10)
+    dim = random.randint(3, 15)
     G = [set() for __ in xrange(dim)]
     train = np.zeros((dim, dim), dtype = int)
     num_ee = random.randint(1, dim * (dim - 1) / 2)
@@ -49,7 +72,7 @@ def valid(sim1, sim2):
     if sim1.shape == sim2.shape:
         dim = sim1.shape[0]
         for i in xrange(dim):
-            for j in xrange(dim):
+            for j in xrange(i + 1, dim):
                 if abs(sim1[i][j] - sim2[i][j]) > EPS:
                     return False
         return True
